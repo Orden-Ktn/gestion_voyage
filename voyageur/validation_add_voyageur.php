@@ -14,22 +14,14 @@ if(isset($_POST['submit'])){
         exit();
     }
 
-    // Connexion à la base de données
-    $db_host = 'localhost';
-    $db_user = 'root';
-    $db_pass = '';
-    $db_name = 'gestion_voyage';
-
-    $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
-    
-    if($conn->connect_error){
-        die("Erreur de connexion à la base de données : " . $conn->connect_error);
+    if (!$connection) {
+        die("Erreur de connexion à la base de données.");
     }
 
-    $stmt = $conn->prepare("INSERT INTO voyageur (nom, prenom, sexe, ville, region) VALUES (?, ?, ?, ?, ?)");
+    $stmt = $connection->prepare("INSERT INTO voyageur (nom, prenom, sexe, ville, region) VALUES (?, ?, ?, ?, ?)");
     
     if(!$stmt){
-        die("Erreur de préparation : " . $conn->error);
+        die("Erreur de préparation : " . $connection->error);
     }
 
     $stmt->bind_param("sssss", $nom, $prenom, $sexe, $ville, $region);
@@ -43,6 +35,6 @@ if(isset($_POST['submit'])){
 
     // Fermeture
     $stmt->close();
-    $conn->close();
+    $connection->close();
 }
 ?>

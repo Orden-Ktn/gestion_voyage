@@ -225,21 +225,14 @@
 
                       <tbody>
                         <?php
-                        $servername = "localhost";
-                        $username = "root";
-                        $password = "";
-                        $dbname = "gestion_voyage";
+                          require('../based.php');
 
-                        // Création de la connexion
-                        $conn = mysqli_connect($servername, $username, $password, $dbname);
-
-                        // Vérification de la connexion
-                        if (!$conn) {
-                            die("Pas de connexion : " . mysqli_connect_error());
-                        }
+                          if (!$connection) {
+                              die("Pas de connexion : " . mysqli_connect_error());
+                          }
 
                         $sql = "SELECT * FROM logement";
-                        $result = mysqli_query($conn, $sql);
+                        $result = mysqli_query($connection, $sql);
 
                         if (mysqli_num_rows($result) > 0) {
                             // Affichage des logements disponibles
@@ -274,7 +267,7 @@
                         }
 
                         // Fermeture de la connexion
-                        mysqli_close($conn);
+                        mysqli_close($connection);
                         ?>
                       </tbody>
 
@@ -338,9 +331,8 @@
         $.post("delete_logement.php", { nom: nom }, function (response) {
           if (response === "success") {
             row.remove();
-          } else {
-            alert("Erreur lors de la suppression !");
-          }
+            location.reload();
+          } 
         });
       }
     });

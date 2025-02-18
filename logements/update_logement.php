@@ -1,14 +1,8 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "gestion_voyage";
+require('../based.php');
 
-// Connexion à la base de données
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Échec de la connexion : " . $conn->connect_error);
+if (!$connection) {
+    die("Échec de connexion à la base de données.");
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -19,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $disponibilite = $_POST["disponibilite"];
 
     $sql = "UPDATE logement SET capacite=?, type=?, lieu=?, disponibilite=? WHERE nom=?";
-    $stmt = $conn->prepare($sql);
+    $stmt = $connection->prepare($sql);
     $stmt->bind_param("sssss", $capacite, $type, $lieu, $disponibilite, $nom);
 
     if ($stmt->execute()) {
@@ -32,5 +26,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->close();
 }
 
-$conn->close();
+$connection->close();
 ?>

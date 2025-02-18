@@ -223,62 +223,53 @@
 
                       <tbody>
                         <?php
-                        $servername = "localhost";
-                        $username = "root";
-                        $password = "";
-                        $dbname = "gestion_voyage";
+                        require('../based.php');
 
-                        // Création de la connexion
-                        $conn = mysqli_connect($servername, $username, $password, $dbname);
-
-                        // Vérification de la connexion
-                        if (!$conn) {
+                        if (!$connection) {
                             die("Pas de connexion : " . mysqli_connect_error());
                         }
 
-                        $sql = "SELECT * FROM voyageur";
-                        $result = mysqli_query($conn, $sql);
+                          // Récupération des voyageurs
+                          $sql = "SELECT * FROM voyageur";
+                          $result = mysqli_query($connection, $sql);
 
-                        if (mysqli_num_rows($result) > 0) {
-                            // Affichage des logements disponibles
-                            while ($row = mysqli_fetch_assoc($result)) {
-                                ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($row["id_voyageur"]); ?></td>
-                                    <td><?php echo htmlspecialchars($row["nom"]); ?></td>
-                                    <td><?php echo htmlspecialchars($row["prenom"]); ?></td>
-                                    <td><?php echo htmlspecialchars($row["sexe"]); ?></td>
-                                    <td><?php echo htmlspecialchars($row["ville"]); ?></td>
-                                    <td><?php echo htmlspecialchars($row["region"]); ?></td>
-                                    <td>
-                                      <div class="form-button-action">
-                                        <button type="button" class="btn btn-link btn-primary btn-lg btn-edit"
-                                            data-bs-toggle="modal" data-bs-target="#addRowModal"
-                                            data-id="<?php echo htmlspecialchars($row['id_voyageur']); ?>"
-                                            data-nom="<?php echo htmlspecialchars($row['nom']); ?>"
-                                            data-prenom="<?php echo htmlspecialchars($row['prenom']); ?>"
-                                            data-sexe="<?php echo htmlspecialchars($row['sexe']); ?>"
-                                            data-ville="<?php echo htmlspecialchars($row['ville']); ?>"
-                                            data-region="<?php echo htmlspecialchars($row['region']); ?>">
-                                            <i class="fa fa-edit"></i>
-                                        </button>
-                                          <button type="button" class="btn btn-link btn-danger btn-delete" data-bs-toggle="tooltip" title="Supprimer">
-                                              <i class="fa fa-times"></i>
-                                          </button>
-                                      </div>
-                                    </td>
+                          if (mysqli_num_rows($result) > 0) {
+                              while ($row = mysqli_fetch_assoc($result)) {
+                                  ?>
+                                  <tr>
+                                      <td><?php echo htmlspecialchars($row["id_voyageur"]); ?></td>
+                                      <td><?php echo htmlspecialchars($row["nom"]); ?></td>
+                                      <td><?php echo htmlspecialchars($row["prenom"]); ?></td>
+                                      <td><?php echo htmlspecialchars($row["sexe"]); ?></td>
+                                      <td><?php echo htmlspecialchars($row["ville"]); ?></td>
+                                      <td><?php echo htmlspecialchars($row["region"]); ?></td>
+                                      <td>
+                                          <div class="form-button-action">
+                                              <button type="button" class="btn btn-link btn-primary btn-lg btn-edit"
+                                                  data-bs-toggle="modal" data-bs-target="#addRowModal"
+                                                  data-id="<?php echo htmlspecialchars($row['id_voyageur']); ?>"
+                                                  data-nom="<?php echo htmlspecialchars($row['nom']); ?>"
+                                                  data-prenom="<?php echo htmlspecialchars($row['prenom']); ?>"
+                                                  data-sexe="<?php echo htmlspecialchars($row['sexe']); ?>"
+                                                  data-ville="<?php echo htmlspecialchars($row['ville']); ?>"
+                                                  data-region="<?php echo htmlspecialchars($row['region']); ?>">
+                                                  <i class="fa fa-edit"></i>
+                                              </button>
+                                              <button type="button" class="btn btn-link btn-danger btn-delete" data-bs-toggle="tooltip" title="Supprimer">
+                                                  <i class="fa fa-times"></i>
+                                              </button>
+                                          </div>
+                                      </td>
+                                  </tr>
+                                  <?php
+                              }
+                          } else {
+                              echo '<tr><td colspan="7" class="text-center">Aucun voyageur enregistré.</td></tr>';
+                          }
 
-                                </tr>
-                                <?php
-                            }
-                        } else {
-                            // Affichage du message si aucun logement n'est enregistré
-                            echo '<tr><td colspan="6" class="text-center">Aucun voyageur enregistré.</td></tr>';
-                        }
-
-                        // Fermeture de la connexion
-                        mysqli_close($conn);
-                        ?>
+                          // Fermeture de la connexion
+                          mysqli_close($connection);
+                          ?>
                       </tbody>
 
                     </table>
@@ -328,19 +319,30 @@
     });
 
     $(".btn-delete").click(function () {
-      if (confirm("Voulez-vous vraiment supprimer ce voyageur ?")) {
+    if (confirm("Voulez-vous vraiment supprimer ce voyageur ?")) {
         let row = $(this).closest("tr");
-        let nom = row.find("td:eq(0)").text();
+        let id_voyageur = row.find("td:eq(0)").text().trim(); // Récupération de l'ID
 
-        $.post("delete_voyageur.php", { nom: nom }, function (response) {
-          if (response === "success") {
-            row.remove();
-          } else {
-            alert("Erreur lors de la suppression !");
-          }
+        $.ajax({
+            type: "POST",
+            url: "delete_voyageur.php",
+            data: { id_voyageur: id_voyageur },
+            dataType: "json",
+            success: function (response) {
+                if (response.success) {
+                    alert(response.message);
+                    row.remove(); // Supprime la ligne de la table
+                } else {
+                    alert("Erreur : " + response.message);
+                }
+            },
+            error: function () {
+                alert("Erreur lors de la communication avec le serveur.");
+            },
         });
-      }
+        }
     });
+
   });
 </script>
 

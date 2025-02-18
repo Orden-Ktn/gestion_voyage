@@ -1,32 +1,27 @@
 <?php
 session_start();
-require('../based.php');
+require('../based.php'); // Inclusion du fichier de connexion
 
-if(isset($_POST['submit'])){
+if (!$connection) {
+    die("Échec de connexion à la base de données.");
+}
+
+if (isset($_POST['submit'])) {
     $nom = trim($_POST['nom']);
     $capacite = trim($_POST['capacite']);
     $type = trim($_POST['type']);
     $lieu = trim($_POST['lieu']);
     $disponibilite = trim($_POST['disponibilite']);
 
-    if(empty($nom) || empty($capacite) || empty($type) || empty($lieu) || empty($disponibilite) || empty($_FILES['photo']['name'])){
+    // Vérification des champs vides
+    if (empty($nom) || empty($capacite) || empty($type) || empty($lieu) || empty($disponibilite) || empty($_FILES['photo']['name'])) {
         echo "Veuillez remplir tous les champs.";
         exit();
     }
 
-    $db_host = 'localhost';
-    $db_user = 'root';
-    $db_pass = '';
-    $db_name = 'gestion_voyage';
-
-    // Connexion à la base de données (ajout de la connexion)
-    $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
-    if($conn->connect_error){
-        die("Erreur de connexion à la base de données : " . $conn->connect_error);
-    }
-
+    // Gestion de l'upload d'image
     $targetDir = "../uploads/";
-    if(!file_exists($targetDir)){
+    if (!file_exists($targetDir)) {
         mkdir($targetDir, 0777, true);
     }
 
@@ -34,15 +29,16 @@ if(isset($_POST['submit'])){
     $targetFilePath = $targetDir . $fileName;
     $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
 
+    // Vérification du type de fichier
     $allowedTypes = ["jpg", "jpeg", "png", "gif"];
-    if(!in_array($fileType, $allowedTypes)){
+    if (!in_array($fileType, $allowedTypes)) {
         echo "Seuls les fichiers JPG, JPEG, PNG et GIF sont autorisés.";
         exit();
     }
 
-    if(move_uploaded_file($_FILES["photo"]["tmp_name"], $targetFilePath)){
+    if (move_uploaded_file($_FILES["photo"]["tmp_name"], $targetFilePath)) {
         // Insertion des données
-        $stmt = $conn->prepare("INSERT INTO logement (nom, capacite, type, lieu, disponibilite, photo) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt = $connection->prepare("INSERT INTO logement (nom, capacite, type, lieu, disponibilite, photo) VALUES (?, ?, ?, ?, ?, ?)");
         $stmt->bind_param("sissss", $nom, $capacite, $type, $lieu, $disponibilite, $targetFilePath);
         
         if($stmt->execute()){

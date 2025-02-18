@@ -1,31 +1,30 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "gestion_voyage";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Échec de la connexion : " . $conn->connect_error);
-}
+require('../based.php');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nom = $_POST["nom"];
+    if (isset($_POST['id_voyageur'])) {
+        $id_voyageur = intval($_POST['id_voyageur']); // Sécurisation de l'entrée
 
-    $sql = "DELETE FROM voyageur WHERE nom=?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $nom);
+        $sql = "DELETE FROM voyageur WHERE id_voyageur = ?";
+        $stmt = mysqli_prepare($connection, $sql);
+        
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "i", $id_voyageur);
+            if (mysqli_stmt_execute($stmt)) {
+                echo json_encode(["success" => true, "message" => "Voyageur supprimé avec succès."]);
+            } else {
+                echo json_encode(["success" => false, "message" => "Erreur lors de la suppression."]);
+            }
+            mysqli_stmt_close($stmt);
+        } else {
+            echo json_encode(["success" => false, "message" => "Requête incorrecte."]);
+        }
 
-    if ($stmt->execute()) {
-        header('Location: all_voyageur.php'); 
-        exit();
+        mysqli_close($connection);
     } else {
-        echo "error";
+        echo json_encode(["success" => false, "message" => "ID manquant."]);
     }
-
-    $stmt->close();
+} else {
+    echo json_encode(["success" => false, "message" => "Méthode non autorisée."]);
 }
-
-$conn->close();
 ?>

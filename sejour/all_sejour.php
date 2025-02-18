@@ -200,20 +200,12 @@
 
                       <tbody>
                         <?php
-                        $servername = "localhost";
-                        $username = "root";
-                        $password = "";
-                        $dbname = "gestion_voyage";
+                        require('../based.php');
 
-                        // Création de la connexion
-                        $conn = mysqli_connect($servername, $username, $password, $dbname);
-
-                        // Vérification de la connexion
-                        if (!$conn) {
+                        if (!$connection) {
                             die("Pas de connexion : " . mysqli_connect_error());
                         }
 
-                        // Requête avec jointure pour récupérer le nom du voyageur et du logement
                         $sql = "SELECT 
                           sejour.id_sejour,
                           sejour.debut,
@@ -226,7 +218,7 @@
                           INNER JOIN voyageur ON sejour.id_voyageur = voyageur.id_voyageur
                           INNER JOIN logement ON sejour.code_logement = logement.code";
 
-                        $result = mysqli_query($conn, $sql);
+                        $result = mysqli_query($connection, $sql);
 
                         if (mysqli_num_rows($result) > 0) {
                             while ($row = mysqli_fetch_assoc($result)) {
@@ -266,7 +258,7 @@
                         }
 
                         // Fermeture de la connexion
-                        mysqli_close($conn);
+                        mysqli_close($connection);
                         ?>
                       </tbody>
 

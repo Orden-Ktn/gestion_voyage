@@ -15,37 +15,27 @@ if(isset($_POST['submit'])){
         exit();
     }
 
-    // Connexion à la base de données
-    $db_host = 'localhost';
-    $db_user = 'root';
-    $db_pass = '';
-    $db_name = 'gestion_voyage';
-
-    $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
-
-    // Vérification de la connexion
-    if($conn->connect_error){
-        die("Erreur de connexion à la base de données : " . $conn->connect_error);
+    if (!$connection) {
+        die("Erreur de connexion à la base de données.");
     }
 
-    // Insertion des données dans la table `sejour`
-    $stmt = $conn->prepare("INSERT INTO sejour (debut, fin, code_logement, id_voyageur) VALUES (?, ?, ?, ?)");
+    $stmt = $connection->prepare("INSERT INTO sejour (debut, fin, code_logement, id_voyageur) VALUES (?, ?, ?, ?)");
     
     if(!$stmt){
-        die("Erreur de préparation de la requête : " . $conn->error);
+        die("Erreur de préparation de la requête : " . $connection->error);
     }
 
     $stmt->bind_param("ssss", $debut, $fin, $code_logement, $id_voyageur);
 
     if($stmt->execute()){
-        $stmt_update = $conn->prepare("UPDATE logement SET disponibilite = 'Non' WHERE code = ?");
+        $stmt_update = $connection->prepare("UPDATE logement SET disponibilite = 'Non' WHERE code = ?");
         
         if($stmt_update){
             $stmt_update->bind_param("s", $code_logement);
             $stmt_update->execute();
             $stmt_update->close();
         } else {
-            echo "Erreur lors de la mise à jour du logement : " . $conn->error;
+            echo "Erreur lors de la mise à jour du logement : " . $connection->error;
         }
 
         // Redirection après succès
@@ -57,6 +47,6 @@ if(isset($_POST['submit'])){
 
     // Fermeture des connexions
     $stmt->close();
-    $conn->close();
+    $connection->close();
 }
 ?>
